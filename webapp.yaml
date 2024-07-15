@@ -1,0 +1,85 @@
+# In order to access this webapp service when using docker minikube, you must use a minikube tunnel or ask minikube to
+# directly access the NodePort. This is because Minikube runs a K8s cluster on a VM (docker container) on macOS/windows 
+# and the ip address returned by `minikube ip` is the IP address of the Minikube VM, which is not directly accessible 
+# from the macOS host network due to the NAT (Network Address Translation) setup. 
+
+# Use `minikube service webapp-service` or `minikube service webapp-service --url` (only returns url to access service)
+
+# `minikube tunnel` creates a network route on your local machine, enabling you to access services in your 
+# Minikube cluster as if they were running directly on your local network. This only works with services with  
+# external IPs, such as LoadBalancer type services
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deployment
+  # Labels are key/value pairs that are attached to K8s resources
+  # They are identifiers which should be meaninful and relevant to users
+  # Labels are not unique, so they can be used to identify all pod replicas of a specific deployment ***
+  labels:
+    app: webapp
+spec:
+  # How many pods do you want to create with this blueprint?
+  replicas: 1
+  # Identifies a set of resources
+  # Match all pods with given "matchLabels"
+  selector:
+    matchLabels:
+      app: webapp
+  # Configures the pod within the deployment
+  # Has its own metadata and specification sections
+  template:
+    metadata:
+      # *** Labels used here (they are required for pod metadata)
+      labels:
+        app: webapp
+    spec:
+      # Define with image will be used to create the pod
+      # Here, define pod to use mongo version 5.0 image
+      containers:
+      - name: webapp
+        image: nanajanashia/k8s-demo-app:v1.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: USER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-user
+        - name: USER_PWD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-password
+        # Get environment variable from Configuration file
+        - name: DB_URL
+          valueFrom:
+            configMapKeyRef: 
+              name: mongo-config
+              key: mongo-url
+--- # yaml files can have multiple configurations
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+spec:
+  # Default type is "ClusterIP", which configures service to be an interal Service
+  # "NodePort" is an external Service type
+  type: NodePort
+  # Used to select pods to forward requests to
+  # Should match the labels of the pods the service points to
+  selector:
+    app: webapp
+  # Ports used to with the service
+  ports:
+    - protocol: TCP
+      # Port which this service is accessible through within each K8s node
+      # Any port we choose (standard is to choose the same port as the pod ports)
+      port: 3000
+      # The port of the pods which belong to the service 
+      # This is the port where the service will forward requests
+      targetPort: 3000
+      # Exposes the Service on each Node's IP at a static port
+      # K8s defines these ports to only be between 30000 - 32767
+      nodePort: 30100

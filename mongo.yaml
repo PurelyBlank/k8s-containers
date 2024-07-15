@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  # Labels are key/value pairs that are attached to K8s resources
+  # They are identifiers which should be meaninful and relevant to users
+  # Labels are not unique, so they can be used to identify all pod replicas of a specific deployment ***
+  labels:
+    app: mongo
+spec:
+  # How many pods do you want to create with this blueprint?
+  replicas: 1
+  # Identifies a set of resources
+  # Match all pods with given "matchLabels"
+  selector:
+    matchLabels:
+      app: mongo
+  # Configures the pod within the deployment
+  # Has its own metadata and specification sections
+  template:
+    metadata:
+      # *** Labels used here (they are required for pod metadata)
+      labels:
+        app: mongo
+    spec:
+      # Define with image will be used to create the pod
+      # Here, define pod to use mongo version 5.0 image
+      containers:
+      - name: mongodb
+        image: mongo:5.0
+        ports:
+        - containerPort: 27017
+        # Pass environment variables to be used within container 
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          # Get value from Secret Configuration
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-user
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongo-password
+--- # yaml files can have multiple configurations
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+spec:
+  # Used to select pods to forward requests to
+  # Should match the labels of the pods the service points to
+  selector:
+    app: mongo
+  # Ports used to with the service
+  ports:
+    - protocol: TCP
+      # Port which this service is accessible through within each K8s node
+      # Any port we choose (standard is to choose the same port as the pod ports)
+      port: 27017
+      # The port of the pods which belong to the service 
+      # This is the port where the service will forward requests
+      targetPort: 27017
