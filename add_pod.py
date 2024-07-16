@@ -1,5 +1,10 @@
 from kubernetes import client, config
 
+
+# Print pods and deployments.
+# Modifies webapp-deployment to increase replica count and automatically create new web-app pod.
+
+
 # Load .kube config file from local machine
 config.load_kube_config()
 
@@ -25,7 +30,7 @@ for deployment in deployments.items:
     print(f"Deployment name: {deployment.metadata.name}")
     # Update webapp-deployment replica count to 2
     if deployment.metadata.name == 'webapp-deployment':
-        deployment.spec.replicas = 2
+        deployment.spec.replicas = 3
         # Must pass modified deployment as a response through api
         response = apps_v1.patch_namespaced_deployment(
             name=deployment.metadata.name,
