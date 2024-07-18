@@ -11,12 +11,13 @@ def start():
     
     # Set user_id and image statically for now
     user_id = 12345
-    image = "python:3.10"
+    image = "kelvinyz/python-watcher:latest"
     
     # Define the container specification
     container = client.V1Container(
         name=f"{user_id}-container",
         image=image,
+        command=["python", "-u", "/watcher.py"],
         ports=[client.V1ContainerPort(container_port=8888)]
     )
     
