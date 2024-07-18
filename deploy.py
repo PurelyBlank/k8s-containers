@@ -53,6 +53,8 @@ def copy_file_to_pod(core_v1_api, namespace, pod_name, src_file, dest_path, cont
     
     exec_stream.close()
         
+
+
 if __name__ == "__main__":
     # Specify variables
     namespace = 'default'

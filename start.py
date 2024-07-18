@@ -1,7 +1,5 @@
 from kubernetes import config, client
 
-
-
 def start():
     """
     Create a deployment from scratch and add to cluster using K8s Python API.
@@ -53,6 +51,8 @@ def start():
     )
     
     print(f"Status: {response.status}")
+
+
 
 if __name__ == "__main__":
     start()
