@@ -8,7 +8,7 @@ def delete_deployment(apps_v1_api, deployment_name, namespace):
             propagation_policy="Background", grace_period_seconds=1
         ),
     )
-    print("\n[INFO] deployment deleted.")
+    print("\nDeployment deleted.")
 
 
 

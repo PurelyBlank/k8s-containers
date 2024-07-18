@@ -15,6 +15,8 @@ def copy_file_to_pod(core_v1_api, namespace, pod_name, src_file, dest_path, cont
         tarinfo = tarfile.TarInfo(name=os.path.basename(dest_path))
         tarinfo.size = len(file_content)
         tar.addfile(tarinfo, io.BytesIO(file_content))
+        
+    print("Created tar archive to copy to pod.")
 
     # Move the buffer position to the beginning
     tar_buffer.seek(0)
@@ -38,6 +40,8 @@ def copy_file_to_pod(core_v1_api, namespace, pod_name, src_file, dest_path, cont
     
     commands = []
     commands.append(tar_buffer.read())
+    
+    print("Executing copy command.")
     
     while exec_stream.is_open():
         exec_stream.update(timeout=1)
