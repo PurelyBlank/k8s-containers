@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workflow-pod-brain
+  namespace: default # Change if using a different namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workflow-pod-brain
+  template:
+    metadata:
+      labels:
+        app: workflow-pod-brain
+    spec:
+      containers:
+      - name: workflow-pod-brain
+        image: nginx:latest # Replace with your Docker image
+        ports:
+        - containerPort: 8080
